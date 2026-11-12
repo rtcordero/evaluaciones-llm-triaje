@@ -9,6 +9,7 @@ Un clasificador de incidencias de clientes usa un modelo de lenguaje para decidi
 - **Grabaciones** (`evals/grabaciones/`): las respuestas reales de cada modelo, con su *digest*, la versión de Ollama, la fecha y la huella de las instrucciones.
 - **Test de regresión** (`test/regresion.test.ts`): puntúa la grabación y falla si el modelo, los casos o las instrucciones cambiaron sin volver a grabar, o si los aciertos bajan del umbral.
 - **Tests del adaptador** (`test/clasificador-ollama.test.ts`): contra un servidor HTTP falso, sin modelo.
+- **Inyección de instrucciones** (`evals/inyeccion.json`, `test/inyeccion.test.ts`): 8 incidencias que intentan dar órdenes al modelo, con su grabación y su umbral; `scripts/sin-esquema.ts` las pasa sin el esquema de salida, para comparar. Código del artículo [Prompt injection](https://rubentejera.com/prompt-injection/).
 - **Historial** (`evals/historial/`): las dos primeras versiones de las instrucciones y sus grabaciones.
 
 `npm test` no llama a ningún modelo: lee las grabaciones, así que da lo mismo en cada ejecución y en cualquier máquina.
@@ -37,6 +38,7 @@ npm run evaluar -- llama3.2:3b http://localhost:11434
 | --- | --- |
 | `llama3.2:3b` | 23 de 30 (77 %) |
 | `llama3.2:1b` | 10 de 30 (33 %) |
+| `llama3.2:3b`, casos de inyección | 6 de 8 |
 
 ## Licencia
 

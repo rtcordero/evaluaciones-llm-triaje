@@ -17,11 +17,16 @@ export type Grabacion = {
 
 const RAIZ = new URL('../', import.meta.url);
 
-export const rutaDeGrabacion = (modelo: string): URL =>
-  new URL(`evals/grabaciones/${modelo.replace(/[^a-z0-9.-]/gi, '_')}.json`, RAIZ);
+// Cada conjunto de casos es un fichero de evals/: «casos» (el examen principal) o «inyeccion».
+export type Conjunto = 'casos' | 'inyeccion';
 
-export function leerCasos(): Caso[] {
-  const casos: Caso[] = JSON.parse(readFileSync(new URL('evals/casos.json', RAIZ), 'utf8'));
+export const rutaDeGrabacion = (modelo: string, conjunto: Conjunto = 'casos'): URL => {
+  const prefijo = conjunto === 'casos' ? '' : `${conjunto}_`;
+  return new URL(`evals/grabaciones/${prefijo}${modelo.replace(/[^a-z0-9.-]/gi, '_')}.json`, RAIZ);
+};
+
+export function leerCasos(conjunto: Conjunto = 'casos'): Caso[] {
+  const casos: Caso[] = JSON.parse(readFileSync(new URL(`evals/${conjunto}.json`, RAIZ), 'utf8'));
   const ids = new Set<string>();
   for (const caso of casos) {
     if (ids.has(caso.id)) throw new Error(`Caso repetido: ${caso.id}`);
@@ -37,10 +42,10 @@ export function leerCasos(): Caso[] {
 export const huellaDeLosCasos = (casos: Caso[]): string =>
   createHash('sha256').update(JSON.stringify(casos.map((c) => [c.id, c.texto]))).digest('hex').slice(0, 12);
 
-export function leerGrabacion(modelo: string): Grabacion {
-  const ruta = rutaDeGrabacion(modelo);
+export function leerGrabacion(modelo: string, conjunto: Conjunto = 'casos'): Grabacion {
+  const ruta = rutaDeGrabacion(modelo, conjunto);
   if (!existsSync(ruta)) {
-    throw new Error(`No hay grabación de ${modelo}: pasa npm run evaluar -- ${modelo}`);
+    throw new Error(`No hay grabación de ${modelo} para «${conjunto}»: pasa npm run evaluar -- ${modelo} <url> ${conjunto}`);
   }
   return JSON.parse(readFileSync(ruta, 'utf8'));
 }
