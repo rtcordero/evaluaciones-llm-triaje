@@ -1,0 +1,129 @@
+{
+  "modelo": "llama3.2:1b",
+  "digest": "baf6a787fdffd633537aa2eb51cfd54cb93ff08e28040095462bb63daf552878",
+  "versionOllama": "0.40.16",
+  "fecha": "2026-11-12",
+  "huellaInstrucciones": "809576ffac67",
+  "respuestas": [
+    {
+      "id": "fac-01",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "fac-02",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "fac-03",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "fac-04",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "fac-05",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "fac-06",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "fac-07",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "acc-01",
+      "obtenida": "otra"
+    },
+    {
+      "id": "acc-02",
+      "obtenida": "acceso"
+    },
+    {
+      "id": "acc-03",
+      "obtenida": "otra"
+    },
+    {
+      "id": "acc-04",
+      "obtenida": "otra"
+    },
+    {
+      "id": "acc-05",
+      "obtenida": "fallo"
+    },
+    {
+      "id": "acc-06",
+      "obtenida": "otra"
+    },
+    {
+      "id": "acc-07",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "fal-01",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "fal-02",
+      "obtenida": "otra"
+    },
+    {
+      "id": "fal-03",
+      "obtenida": "fallo"
+    },
+    {
+      "id": "fal-04",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "fal-05",
+      "obtenida": "otra"
+    },
+    {
+      "id": "fal-06",
+      "obtenida": "otra"
+    },
+    {
+      "id": "fal-07",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "otr-01",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "otr-02",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "otr-03",
+      "obtenida": "acceso"
+    },
+    {
+      "id": "otr-04",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "otr-05",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "otr-06",
+      "obtenida": "otra"
+    },
+    {
+      "id": "dud-01",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "dud-02",
+      "obtenida": "facturacion"
+    },
+    {
+      "id": "dud-03",
+      "obtenida": "facturacion"
+    }
+  ]
+}
