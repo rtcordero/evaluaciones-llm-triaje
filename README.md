@@ -7,7 +7,9 @@ Un clasificador de incidencias de clientes usa un modelo de lenguaje para decidi
 - **Tests del dominio** (`test/triaje.test.ts`): las reglas de negocio, con un adaptador falso. Sin modelo.
 - **Casos etiquetados** (`evals/casos.json`): 30 incidencias con la categoría que decide el equipo, tres de ellas dudosas.
 - **Grabaciones** (`evals/grabaciones/`): las respuestas reales de cada modelo, con su *digest*, la versión de Ollama, la fecha y la huella de las instrucciones.
-- **Test de regresión** (`test/regresion.test.ts`): puntúa la grabación y falla si las instrucciones cambiaron sin volver a grabar o si los aciertos bajan del umbral.
+- **Test de regresión** (`test/regresion.test.ts`): puntúa la grabación y falla si el modelo, los casos o las instrucciones cambiaron sin volver a grabar, o si los aciertos bajan del umbral.
+- **Tests del adaptador** (`test/clasificador-ollama.test.ts`): contra un servidor HTTP falso, sin modelo.
+- **Historial** (`evals/historial/`): las dos primeras versiones de las instrucciones y sus grabaciones.
 
 `npm test` no llama a ningún modelo: lee las grabaciones, así que da lo mismo en cada ejecución y en cualquier máquina.
 
@@ -23,7 +25,7 @@ npm ci
 npm test
 ```
 
-Para volver a grabar las respuestas de un modelo, con Ollama en marcha:
+Para volver a grabar las respuestas de un modelo, con Ollama en marcha (si falla la conexión, no se graba nada):
 
 ```bash
 npm run evaluar -- llama3.2:3b http://localhost:11434

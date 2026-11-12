@@ -1,6 +1,8 @@
 // Una grabación guarda las respuestas reales de un modelo a los casos, con lo necesario para saber
-// si sigue valiendo: qué modelo exacto, qué instrucciones y cuándo.
-import { readFileSync } from 'node:fs';
+// si sigue valiendo: qué modelo exacto, qué casos, qué instrucciones y cuándo.
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync } from 'node:fs';
+import { CATEGORIAS } from './dominio/triaje.ts';
 import type { Caso, Respuesta } from './evaluacion.ts';
 
 export type Grabacion = {
@@ -9,12 +11,36 @@ export type Grabacion = {
   versionOllama: string;
   fecha: string;
   huellaInstrucciones: string;
+  huellaCasos: string;
   respuestas: Respuesta[];
 };
 
-export const rutaDeGrabacion = (modelo: string): string =>
-  `evals/grabaciones/${modelo.replace(/[^a-z0-9.-]/gi, '_')}.json`;
+const RAIZ = new URL('../', import.meta.url);
 
-export const leerCasos = (): Caso[] => JSON.parse(readFileSync('evals/casos.json', 'utf8'));
+export const rutaDeGrabacion = (modelo: string): URL =>
+  new URL(`evals/grabaciones/${modelo.replace(/[^a-z0-9.-]/gi, '_')}.json`, RAIZ);
 
-export const leerGrabacion = (modelo: string): Grabacion => JSON.parse(readFileSync(rutaDeGrabacion(modelo), 'utf8'));
+export function leerCasos(): Caso[] {
+  const casos: Caso[] = JSON.parse(readFileSync(new URL('evals/casos.json', RAIZ), 'utf8'));
+  const ids = new Set<string>();
+  for (const caso of casos) {
+    if (ids.has(caso.id)) throw new Error(`Caso repetido: ${caso.id}`);
+    if (!(CATEGORIAS as readonly string[]).includes(caso.esperada)) {
+      throw new Error(`${caso.id}: categoría esperada desconocida «${caso.esperada}»`);
+    }
+    ids.add(caso.id);
+  }
+  return casos;
+}
+
+// Solo cuentan el id y el texto: cambiar la respuesta esperada no exige volver a grabar.
+export const huellaDeLosCasos = (casos: Caso[]): string =>
+  createHash('sha256').update(JSON.stringify(casos.map((c) => [c.id, c.texto]))).digest('hex').slice(0, 12);
+
+export function leerGrabacion(modelo: string): Grabacion {
+  const ruta = rutaDeGrabacion(modelo);
+  if (!existsSync(ruta)) {
+    throw new Error(`No hay grabación de ${modelo}: pasa npm run evaluar -- ${modelo}`);
+  }
+  return JSON.parse(readFileSync(ruta, 'utf8'));
+}

@@ -1,4 +1,5 @@
-// Lo que se le pide al modelo. Si cambia, cambia su huella y hay que volver a grabar la evaluación.
+// Lo que se le pide al modelo y cómo. Si cambia algo de esto, cambia la huella
+// y el test de regresión pide volver a grabar la evaluación.
 import { createHash } from 'node:crypto';
 import { CATEGORIAS } from '../dominio/triaje.ts';
 
@@ -16,6 +17,12 @@ export const FORMATO = {
   additionalProperties: false,
 };
 
+// Temperatura 0 y semilla fija: la misma entrada da la misma salida en la misma máquina.
+export const OPCIONES = { temperature: 0, seed: 42 };
+
 export function huellaDeLasInstrucciones(): string {
-  return createHash('sha256').update(INSTRUCCIONES).update(JSON.stringify(FORMATO)).digest('hex').slice(0, 12);
+  return createHash('sha256')
+    .update(JSON.stringify({ INSTRUCCIONES, FORMATO, OPCIONES }))
+    .digest('hex')
+    .slice(0, 12);
 }

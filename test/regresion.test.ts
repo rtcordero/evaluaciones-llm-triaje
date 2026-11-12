@@ -4,21 +4,20 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { huellaDeLasInstrucciones } from '../src/adaptadores/instrucciones.ts';
 import { puntuar } from '../src/evaluacion.ts';
-import { leerCasos, leerGrabacion } from '../src/grabacion.ts';
-import { MODELO_CLASIFICADOR, UMBRAL_DE_ACIERTOS } from '../src/modelo.ts';
+import { huellaDeLosCasos, leerCasos, leerGrabacion } from '../src/grabacion.ts';
+import { DIGEST_DEL_MODELO, MODELO_CLASIFICADOR, UMBRAL_DE_ACIERTOS } from '../src/modelo.ts';
 
 const casos = leerCasos();
 const grabacion = leerGrabacion(MODELO_CLASIFICADOR);
+const volverAGrabar = `vuelve a pasar npm run evaluar -- ${MODELO_CLASIFICADOR}`;
 
-test('la grabación se hizo con las instrucciones actuales', () => {
-  assert.equal(
-    grabacion.huellaInstrucciones,
-    huellaDeLasInstrucciones(),
-    'Las instrucciones han cambiado desde la grabación: vuelve a pasar npm run evaluar',
-  );
+test('la grabación corresponde al modelo, los casos y las instrucciones actuales', () => {
+  assert.equal(grabacion.digest, DIGEST_DEL_MODELO, `El modelo descargado ha cambiado: ${volverAGrabar}`);
+  assert.equal(grabacion.huellaCasos, huellaDeLosCasos(casos), `Los casos han cambiado: ${volverAGrabar}`);
+  assert.equal(grabacion.huellaInstrucciones, huellaDeLasInstrucciones(), `Las instrucciones han cambiado: ${volverAGrabar}`);
 });
 
-test(`${MODELO_CLASIFICADOR} acierta al menos el ${UMBRAL_DE_ACIERTOS * 100} % de los casos`, () => {
+test(`${MODELO_CLASIFICADOR} acierta al menos el ${Math.round(UMBRAL_DE_ACIERTOS * 100)} % de los casos`, () => {
   const r = puntuar(casos, grabacion.respuestas);
   const detalle = r.fallos.map((f) => `${f.id}: ${f.obtenida ?? 'sin categoría'} (esperada ${f.esperada})`).join('\n');
   assert.ok(r.tasa >= UMBRAL_DE_ACIERTOS, `${r.aciertos} de ${r.total}. Fallos:\n${detalle}`);

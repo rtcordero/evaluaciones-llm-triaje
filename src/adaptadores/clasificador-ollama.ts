@@ -5,13 +5,15 @@ import {
   type Categoria,
   type ClasificadorDeIncidencias,
 } from '../dominio/triaje.ts';
-import { FORMATO, INSTRUCCIONES } from './instrucciones.ts';
+import { FORMATO, INSTRUCCIONES, OPCIONES } from './instrucciones.ts';
 
 const TIEMPO_MAXIMO_MS = 60_000;
 
 const esCategoria = (valor: unknown): valor is Categoria =>
   typeof valor === 'string' && (CATEGORIAS as readonly string[]).includes(valor);
 
+// Los fallos de transporte (red, tiempo, HTTP) llevan la causa en `cause`;
+// los de una respuesta que no sirve, no. scripts/evaluar.ts usa esa diferencia.
 export class ClasificadorOllama implements ClasificadorDeIncidencias {
   #url: string;
   #modelo: string;
@@ -22,17 +24,35 @@ export class ClasificadorOllama implements ClasificadorDeIncidencias {
   }
 
   async clasificar(texto: string): Promise<Categoria> {
-    let cuerpo: unknown;
+    const cuerpo = await this.#llamar(texto);
+    const contenido = (cuerpo as { message?: { content?: unknown } } | null)?.message?.content;
+    if (typeof contenido !== 'string') {
+      throw new ClasificacionNoDisponible('la respuesta no trae contenido');
+    }
+    let categoria: unknown;
     try {
-      const respuesta = await fetch(`${this.#url}/api/chat`, {
+      categoria = JSON.parse(contenido).categoria;
+    } catch {
+      throw new ClasificacionNoDisponible('el contenido no es JSON');
+    }
+    // `format` impone el esquema, pero la validación se hace igualmente aquí.
+    if (!esCategoria(categoria)) {
+      throw new ClasificacionNoDisponible(`categoría desconocida: ${String(categoria)}`);
+    }
+    return categoria;
+  }
+
+  async #llamar(texto: string): Promise<unknown> {
+    let respuesta: Response;
+    try {
+      respuesta = await fetch(new URL('/api/chat', this.#url), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         signal: AbortSignal.timeout(TIEMPO_MAXIMO_MS),
         body: JSON.stringify({
           model: this.#modelo,
           stream: false,
-          // Temperatura 0 y semilla fija: la misma entrada da la misma salida en la misma máquina.
-          options: { temperature: 0, seed: 42 },
+          options: OPCIONES,
           format: FORMATO,
           messages: [
             { role: 'system', content: INSTRUCCIONES },
@@ -40,27 +60,18 @@ export class ClasificadorOllama implements ClasificadorDeIncidencias {
           ],
         }),
       });
-      if (!respuesta.ok) {
-        throw new Error(`HTTP ${respuesta.status}`);
-      }
-      cuerpo = await respuesta.json();
     } catch (error) {
-      throw new ClasificacionNoDisponible('Ollama no responde', { cause: error });
+      const motivo = error instanceof Error && error.name === 'TimeoutError' ? 'Ollama tarda demasiado' : 'Ollama no responde';
+      throw new ClasificacionNoDisponible(motivo, { cause: error });
     }
-    return this.#leerCategoria(cuerpo);
-  }
-
-  #leerCategoria(cuerpo: unknown): Categoria {
-    const contenido = (cuerpo as { message?: { content?: unknown } }).message?.content;
-    let categoria: unknown;
+    if (!respuesta.ok) {
+      const detalle = await respuesta.text().catch(() => '');
+      throw new ClasificacionNoDisponible(`Ollama respondió HTTP ${respuesta.status}`, { cause: new Error(detalle) });
+    }
     try {
-      categoria = JSON.parse(String(contenido)).categoria;
-    } catch {
-      throw new ClasificacionNoDisponible('la respuesta no es JSON');
+      return await respuesta.json();
+    } catch (error) {
+      throw new ClasificacionNoDisponible('la respuesta HTTP no es JSON', { cause: error });
     }
-    if (!esCategoria(categoria)) {
-      throw new ClasificacionNoDisponible(`categoría desconocida: ${String(categoria)}`);
-    }
-    return categoria;
   }
 }

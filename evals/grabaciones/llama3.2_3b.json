@@ -3,7 +3,8 @@
   "digest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
   "versionOllama": "0.40.16",
   "fecha": "2026-11-12",
-  "huellaInstrucciones": "809576ffac67",
+  "huellaInstrucciones": "8bb7e7eac6c8",
+  "huellaCasos": "14222196ff72",
   "respuestas": [
     {
       "id": "fac-01",

@@ -1,0 +1,5 @@
+Clasifica la incidencia de un cliente en una sola categoría:
+- facturacion: cobros, facturas, devoluciones o precios.
+- acceso: no puede entrar, contraseña, cuenta bloqueada.
+- fallo: algo de la aplicación no funciona o da error.
+- otra: cualquier otra cosa.
