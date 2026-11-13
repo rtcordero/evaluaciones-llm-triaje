@@ -7,7 +7,7 @@ import { ClasificadorOllama } from '../src/adaptadores/clasificador-ollama.ts';
 import { huellaDeLasInstrucciones } from '../src/adaptadores/instrucciones.ts';
 import { puntuar, type Respuesta } from '../src/evaluacion.ts';
 import { huellaDeLosCasos, leerCasos, rutaDeGrabacion, type Conjunto, type Grabacion } from '../src/grabacion.ts';
-import { MODELO_CLASIFICADOR } from '../src/modelo.ts';
+import { DIGEST_DEL_MODELO, MODELO_CLASIFICADOR } from '../src/modelo.ts';
 
 const modelo = process.argv[2] ?? MODELO_CLASIFICADOR;
 const url = process.argv[3] ?? process.env.OLLAMA_URL ?? 'http://localhost:11434';
@@ -18,6 +18,11 @@ const descargado = etiquetas.models.find((m) => m.name === modelo);
 if (descargado === undefined) {
   console.error(`El modelo ${modelo} no está descargado: ollama pull ${modelo}`);
   process.exit(1);
+}
+if (modelo === MODELO_CLASIFICADOR && descargado.digest !== DIGEST_DEL_MODELO) {
+  console.warn(
+    `Ollama tiene otra versión de ${modelo} (${descargado.digest.slice(0, 12)}…): actualiza DIGEST_DEL_MODELO o vuelve a descargar la anterior.`,
+  );
 }
 const version = (await (await fetch(new URL('/api/version', url))).json()) as { version: string };
 
