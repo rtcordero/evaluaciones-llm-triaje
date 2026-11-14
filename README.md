@@ -16,7 +16,7 @@ Un clasificador de incidencias de clientes usa un modelo de lenguaje para decidi
 
 ## Requisitos
 
-- Node.js 24.22.2 o posterior (`.node-version`).
+- Node.js 24.22.3 o posterior (`.node-version`).
 - Para volver a grabar: [Ollama](https://ollama.com/) con los modelos `llama3.2:3b` y `llama3.2:1b`.
 
 ## Uso
